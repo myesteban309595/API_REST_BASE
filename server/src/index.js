@@ -1,29 +1,27 @@
 const express = require('express');
-const cors = require('cors')
-const config = require('./config')
-const mysql = require('mysql2');
-const myconn = require('express-myconnection')
+const morgan = require('morgan')
+const cors = require('cors');
+const expressJwt = require('express-jwt');
 
-const dbOptions = require('./database/db')
+const config = require('./config/config')
 const app = express();
 
-console.log(dbOptions);
+require('./dataBase/db')
 
-const PORT = config.module.PORT || 6060
 
-//* ****   midleware   *********
+const PORT = config.module.PORT
+
+//static files
+app.use(express.static('public'))
+//middleware
+app.use(cors()); //comunica la api con el servidor y ciertos dominios
+app.use(morgan('dev'))
 app.use(express.json());
-app.use(cors());
-app.use(myconn(mysql,dbOptions,'single'));
-
-//~ *********** RUTAS *********
-app.get('/', (req,res)=>{
-    res.send('hola desde el servidor')
-})
-
-//^ autenticacion conexion a la base de datos
-//dbAutenticathe()
+//Rutas
+app.use('/user', require('./routes/user.route'));
+app.use('/login', require('./routes/login.route'));
+app.use('/product', require('./controllers/products.controller'));
 
 app.listen(PORT, ()=> {
-    console.log(`connected on port ${PORT}`)
+    console.log(`conectado en el puerto: ${PORT}`);
 })
